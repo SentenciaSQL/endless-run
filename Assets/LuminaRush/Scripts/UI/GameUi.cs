@@ -106,23 +106,23 @@ namespace LuminaRush
             safe = Rect("Safe", canvasObject.transform);
             Stretch(safe);
 
-            boot = Screen("Boot");
+            boot = Page("Boot");
             bootText = Label(boot.transform, "Preparando Lumina Rush", 40, TextAnchor.MiddleCenter);
             Stretch(bootText.rectTransform, 80f, 80f, 80f, 80f);
 
-            menu = Screen("Menu");
+            menu = Page("Menu");
             BuildMenu();
-            hud = Screen("Hud");
+            hud = Page("Hud");
             BuildHud();
-            pause = Screen("Pause");
+            pause = Page("Pause");
             BuildPause();
-            gameOver = Screen("GameOver");
+            gameOver = Page("GameOver");
             BuildGameOver();
-            shop = Screen("Shop");
+            shop = Page("Shop");
             BuildShopShell();
-            missions = Screen("Missions");
+            missions = Page("Missions");
             BuildMissionShell();
-            settings = Screen("Settings");
+            settings = Page("Settings");
             BuildSettings();
             BuildToast(canvasObject.transform);
             HideAll();
@@ -599,7 +599,7 @@ namespace LuminaRush
             safe.offsetMax = Vector2.zero;
         }
 
-        GameObject Screen(string name)
+        GameObject Page(string name)
         {
             RectTransform rect = Rect(name, safe);
             Stretch(rect);
