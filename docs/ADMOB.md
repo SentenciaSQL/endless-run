@@ -98,6 +98,22 @@ La recompensa se marca como entregada en ese callback. Cerrar el anuncio sin rec
 
 `OnAdPaid` registra el valor que envía el SDK (`value_micros`, moneda y precisión) en el registro local. Un micro-unidad es una millonésima de la moneda indicada. El juego no convierte eso en ingresos estimados ni asume un pago fijo por impresión. En el editor, el plugin puede informar un valor de marcador: el evento lleva `editor_placeholder` en 1.
 
-## 8. Permisos de Android
+## 8. Si la build dice «Resolution failed» o «Gradle failed to fetch dependencies»
+
+Ese error lo escribe el External Dependency Manager cuando intenta descargar los AAR con su Gradle 5.1.1. Esa herramienta no resuelve `play-services-ads` 25.4.0. La build de Unity 2022.3 usa su propio Gradle, más nuevo, y sí puede.
+
+Antes de compilar, el proyecto deja listas `mainTemplate.gradle`, `gradleTemplate.properties` y `settingsTemplate.gradle`, activa esas plantillas en Player Settings y mete las dependencias en `mainTemplate.gradle`. El resolver entonces parchea los archivos y no vuelve a lanzar la descarga antigua.
+
+Si la ventana de resolución se quedó a medias:
+
+1. Cierra Unity por completo, para cortar el Gradle que sigue en segundo plano.
+2. Trae este cambio.
+3. Abre el proyecto, espera a que importe y compila otra vez para Android.
+
+No borres `mainTemplate.gradle` si ya contiene `**DEPS**` y `play-services-ads`. Si el archivo está vacío o es de otra versión de Unity, bórralo y deja que el editor lo copie de nuevo al compilar.
+
+`Assets/GoogleMobileAds/link.xml` evita otro error de Windows del plugin: `Invalid AssetDatabase path ... link.xml`.
+
+## 9. Permisos de Android
 
 El plugin añade `INTERNET` y `com.google.android.gms.permission.AD_ID` mediante su procesador de Gradle. El reproductor también fuerza el permiso de internet. No hace falta un `AndroidManifest.xml` propio; si añades uno, no borres la meta-data `com.google.android.gms.ads.APPLICATION_ID`.
