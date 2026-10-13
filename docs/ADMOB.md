@@ -114,6 +114,12 @@ No borres `mainTemplate.gradle` si ya contiene `**DEPS**` y `play-services-ads`.
 
 `Assets/GoogleMobileAds/link.xml` evita otro error de Windows del plugin: `Invalid AssetDatabase path ... link.xml`.
 
+## 8.1 Si Gradle dice «Duplicate class»
+
+Eso pasa cuando el resolver antiguo dejó AAR dentro de `Assets/Plugins/Android` y, además, `mainTemplate.gradle` pide las mismas librerías por Maven. Unity mete las dos copias y `checkReleaseDuplicateClasses` falla. El nombre local se ve como `jetified-androidx...` o `:androidx.browser.browser-1.10.0:`.
+
+Al compilar, el proyecto borra esos AAR, JAR y carpetas descargadas, y conserva las plantillas de Gradle. Si quieres limpiarlo a mano antes de traer el cambio, cierra Unity y elimina de `Assets\Plugins\Android` todo lo que no sea `mainTemplate.gradle`, `gradleTemplate.properties`, `settingsTemplate.gradle` ni sus `.meta`.
+
 ## 9. Permisos de Android
 
 El plugin añade `INTERNET` y `com.google.android.gms.permission.AD_ID` mediante su procesador de Gradle. El reproductor también fuerza el permiso de internet. No hace falta un `AndroidManifest.xml` propio; si añades uno, no borres la meta-data `com.google.android.gms.ads.APPLICATION_ID`.
