@@ -49,8 +49,13 @@ namespace LuminaRush.EditorTools
             CopyTemplateIfMissing("mainTemplate.gradle", building);
             CopyTemplateIfMissing("gradleTemplate.properties", building);
             CopyTemplateIfMissing("settingsTemplate.gradle", building);
+            if (RemoveResolvedLibraries())
+                AssetDatabase.Refresh();
+            if (building)
+                DeleteStaleAndroidGradleProject();
             EnsureDependencies();
             EnsureGradleProperties();
+            RestrictIosPluginToIos();
         }
 
         static void EnableTemplateFlags()
@@ -150,6 +155,83 @@ namespace LuminaRush.EditorTools
             else
                 text = text.TrimEnd() + "\n" + addition;
             File.WriteAllText(path, text, new UTF8Encoding(false));
+        }
+
+        static bool RemoveResolvedLibraries()
+        {
+            if (!Directory.Exists(PluginsAndroid))
+                return false;
+            bool removed = false;
+            string[] directories = Directory.GetDirectories(PluginsAndroid);
+            for (int i = 0; i < directories.Length; i++)
+            {
+                Directory.Delete(directories[i], true);
+                DeleteIfExists(directories[i] + ".meta");
+                removed = true;
+            }
+            string[] files = Directory.GetFiles(PluginsAndroid);
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (KeepAndroidPluginFile(Path.GetFileName(files[i])))
+                    continue;
+                File.Delete(files[i]);
+                removed = true;
+            }
+            return removed;
+        }
+
+        static void DeleteStaleAndroidGradleProject()
+        {
+            DeleteDirectoryIfExists("Library/Bee/Android");
+            DeleteDirectoryIfExists("Temp/gradleOut");
+        }
+
+        static void DeleteDirectoryIfExists(string path)
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+        }
+
+        static bool KeepAndroidPluginFile(string fileName)
+        {
+            switch (fileName)
+            {
+                case "mainTemplate.gradle":
+                case "mainTemplate.gradle.meta":
+                case "gradleTemplate.properties":
+                case "gradleTemplate.properties.meta":
+                case "settingsTemplate.gradle":
+                case "settingsTemplate.gradle.meta":
+                case "baseProjectTemplate.gradle":
+                case "baseProjectTemplate.gradle.meta":
+                case "launcherTemplate.gradle":
+                case "launcherTemplate.gradle.meta":
+                case "proguard-user.txt":
+                case "proguard-user.txt.meta":
+                case "AndroidManifest.xml":
+                case "AndroidManifest.xml.meta":
+                case ".gitkeep":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        static void DeleteIfExists(string path)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+        static void RestrictIosPluginToIos()
+        {
+            const string pluginPath = "Packages/com.google.ads.mobile/Plugins/iOS/unity-plugin-library.xcframework";
+            PluginImporter importer = AssetImporter.GetAtPath(pluginPath) as PluginImporter;
+            if (importer == null || !importer.GetCompatibleWithPlatform(BuildTarget.Android))
+                return;
+            importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
+            importer.SetCompatibleWithPlatform(BuildTarget.iOS, true);
+            importer.SaveAndReimport();
         }
     }
 }
